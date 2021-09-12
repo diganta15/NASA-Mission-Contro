@@ -1,0 +1,23 @@
+{
+  "name": "nasa-project",
+  "version": "1.0.0",
+  "description": "NASA Mission Control Full Stack Application",
+  "main": "index.js",
+  "scripts": {
+    "install-server": "npm i --prefix server",
+    "install-client": "npm i --prefix client",
+    "install": "npm run i server && npm run i client",
+    "test": "npm run test --prefix server && npm run test --prefix client",
+    "client": "npm start --prefix client",
+    "server": "npm run watch --prefix server",
+    "dev": "concurrently \"npm run server\" \"npm run client\" "
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^6.2.1"
+  },
+  "dependencies": {
+    "morgan": "^1.10.0"
+  }
+}

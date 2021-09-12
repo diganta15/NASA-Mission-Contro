@@ -1,8 +1,10 @@
 const parse = require('csv-parse');
 const fs = require('fs');
+const { resolve, dirname } = require('path');
+const path = require('path')
 
 const planets = [];
-const habitablePlanets = [];
+// const habitablePlanets = [];
 
 function isHabitablePlanet(planet) {
     //Returns true if it is habitable and gets right amount of light and is of adequate size
@@ -13,28 +15,52 @@ function isHabitablePlanet(planet) {
 
 }
 
-fs.createReadStream('../server/data/kepler_data.csv')//Source
-    .pipe(parse({
-        comment: '#',
-        columns: true,
-    })/*Destination*/) //Pipe - Connecting readable stream source data to writable destination data. Sends parsed data
-    .on('data', (data) => {
-        if (isHabitablePlanet(data)) { //Checks if the planet is habitable
-            habitablePlanets.push(data); //Pushes data to results variable
-        }
-        planets.push(data);
+/*
+const promise = new Promise((resolve,reject)=>{
+    resolve();
+});
+promise.then(result =>{
 
-    })
-    .on('error', (err) => {
-        console.log(err);
-    })
-    .on('end', () => {
-        console.log(habitablePlanets.map((planet) => {
-            return planet['kepler_name']
-        }))
-        console.log(`${habitablePlanets.length} habitable planets found`);
-        console.log('Done');
+})
+
+Alternatively
+const result = await promise();
+*/
+
+function loadsPlanetsData(){
+
+    return new Promise((resolve,reject)=>{
+        fs.createReadStream(path.join(__dirname,'..','..','data','kepler_data.csv'))//Source
+            .pipe(parse({
+                comment: '#',
+                columns: true,
+            })/*Destination*/) //Pipe - Connecting readable stream source data to writable destination data. Sends parsed data
+            .on('data', (data) => {
+                if (isHabitablePlanet(data)) { //Checks if the planet is habitable
+                    planets.push(data); //Pushes data to results variable
+                }
+                
+
+            })
+            .on('error', (err) => {
+                console.log(err);
+                reject(err);
+            })
+            .on('end', () => {
+                console.log('Done');
+                resolve();
+            })
     })
 
 
-module.exports = planets;
+    
+}
+
+function getAllPlanets(){
+    return planets;
+}
+
+module.exports = {
+    loadsPlanetsData,
+    getAllPlanets,
+};
