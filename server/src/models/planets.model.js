@@ -3,7 +3,7 @@ const fs = require('fs');
 const { resolve, dirname } = require('path');
 const path = require('path')
 
-const planets = [];
+const planets = require('./planets.mongo');
 // const habitablePlanets = [];
 
 function isHabitablePlanet(planet) {
@@ -35,9 +35,9 @@ function loadsPlanetsData(){
                 comment: '#',
                 columns: true,
             })/*Destination*/) //Pipe - Connecting readable stream source data to writable destination data. Sends parsed data
-            .on('data', (data) => {
+            .on('data', async(data) => {
                 if (isHabitablePlanet(data)) { //Checks if the planet is habitable
-                    planets.push(data); //Pushes data to results variable
+                  savePlanet(data) //Pushes data to results variable
                 }
                 
 
@@ -46,8 +46,9 @@ function loadsPlanetsData(){
                 console.log(err);
                 reject(err);
             })
-            .on('end', () => {
-                console.log('Done');
+            .on('end', async() => {
+                const planetsFound = (await getAllPlanets()).length;
+                console.log(`${planetsFound} habitable planets found`);
                 resolve();
             })
     })
@@ -56,8 +57,25 @@ function loadsPlanetsData(){
     
 }
 
-function getAllPlanets(){
-    return planets;
+async function getAllPlanets(){
+  return await planets.find({},{
+      '_id':0,'__v':0
+  });
+}
+
+async function savePlanet(data){
+   try{
+       await planets.updateOne({
+           kepler_name: data.kepler_name
+       }, {
+           kepler_name: data.kepler_name,
+       }, {
+           upsert: true
+       });
+   }
+   catch(err){
+       console.log(`Could not save planet${err}`)
+   }
 }
 
 module.exports = {
